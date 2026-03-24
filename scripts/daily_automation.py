@@ -103,21 +103,39 @@ def parse_applicants(val):
 
 def posted_recently(val):
     """
-    Returns True if job was posted within last 24–48 hours.
-    Accepts strings like: 'Just now', '2 hours ago', '1 day ago', 'yesterday', '15 hours ago'
-    Rejects: '2 days ago', '1 week ago', '3 days ago', etc.
+    Returns True ONLY if job was posted within last 24 hours.
+    Accepts: 'Just now', 'X minutes ago', 'X hours ago', 'today', '1 day ago'
+    Rejects: 'yesterday', '2 days ago', '1 week ago', '1 month ago', etc.
+
+    NOTE: 'yesterday' is intentionally rejected — it could be up to 47 hours ago.
+    We only want jobs from the last 24 hours so we stay strict.
     """
     if not val:
-        return True  # unknown → include
+        return True  # unknown time → include (Apify sometimes omits this)
     s = str(val).lower().strip()
-    # Always include these
-    if any(x in s for x in ['just now', 'minute', 'hour', 'today', '1 day', 'yesterday']):
+
+    # ── ACCEPT: clearly within 24 hours ──────────────────────────────────────
+    if s in ('just now', 'today', 'now'):
         return True
-    # Reject anything older
-    if any(x in s for x in ['2 day', '3 day', '4 day', '5 day', '6 day', 'week', 'month']):
+    if re.search(r'\d+\s+minute', s):
+        return True
+    if re.search(r'\d+\s+hour', s):
+        return True
+    # '1 day ago' only — not '2 days ago' etc.
+    if re.match(r'^1\s+day', s):
+        return True
+
+    # ── REJECT: anything older ────────────────────────────────────────────────
+    # yesterday, 2 days, 3 days ... week, month, year
+    if 'yesterday' in s:
         return False
-    # Default include
-    return True
+    if re.search(r'[2-9]\d*\s+day', s):
+        return False
+    if 'week' in s or 'month' in s or 'year' in s:
+        return False
+
+    # Default: reject unknown formats to be safe
+    return False
 
 # ── Step 1: Scrape LinkedIn ───────────────────────────────────────────────────
 def scrape_jobs():
@@ -153,52 +171,97 @@ def scrape_jobs():
     else:
         print("  No APIFY_TOKEN set — using cached sample data")
 
-    # Fallback: fresh-looking sample jobs (replace with real scrape in production)
+    # ── Fallback sample data ──────────────────────────────────────────────────
+    # Used only when APIFY_TOKEN is not set.
+    # All jobs here already pass filters: posted <24h, <50 applicants.
+    # IDs are dated so they expire from seen_jobs naturally.
+    today_tag = datetime.now(timezone.utc).strftime('%Y%m%d')
     return [
-        {'job_id': 'sample_001', 'job_title': 'DevOps Engineer', 'company_name': 'Accenture',
-         'location': 'Dublin, Ireland', 'time_posted': 'Just now',
-         'num_applicants': 'Be among the first 25 applicants', 'easy_apply': True,
-         'job_url': 'https://www.linkedin.com/jobs/view/4384547978',
-         'apply_url': 'https://www.accenture.com/ie-en/careers/jobdetails?id=R00316490_en',
-         'job_description': 'Azure DevOps GitLab CI Terraform Kubernetes AKS Docker Python Bash DevSecOps IaC monitoring CI/CD pipelines cloud infrastructure'},
-        {'job_id': 'sample_002', 'job_title': 'Software Cloud Engineer II', 'company_name': 'Medtronic',
-         'location': 'Galway, Ireland', 'time_posted': '3 hours ago',
-         'num_applicants': '12 applicants', 'easy_apply': True,
-         'job_url': 'https://www.linkedin.com/jobs/view/4385105554',
-         'apply_url': 'https://www.linkedin.com/jobs/view/4385105554',
-         'job_description': 'AWS S3 Docker Kubernetes Azure DevOps CI/CD pipelines .NET microservices cloud infrastructure automation'},
-        {'job_id': 'sample_003', 'job_title': 'Associate Cloud Engineer', 'company_name': 'Dell Technologies',
-         'location': 'Dublin, Ireland', 'time_posted': '1 day ago',
-         'num_applicants': '31 applicants', 'easy_apply': True,
-         'job_url': 'https://www.linkedin.com/jobs/search/?keywords=cloud+engineer+dell+ireland',
-         'apply_url': 'https://jobs.dell.com',
-         'job_description': 'AWS GCP Terraform Python CI/CD pipelines cloud automation monitoring Linux scripting'},
-        {'job_id': 'sample_004', 'job_title': 'Junior DevOps Engineer', 'company_name': 'Workhuman',
-         'location': 'Dublin, Ireland', 'time_posted': '8 hours ago',
-         'num_applicants': '19 applicants', 'easy_apply': False,
-         'job_url': 'https://www.linkedin.com/jobs/search/?keywords=junior+devops+workhuman',
-         'apply_url': 'https://www.workhuman.com/careers',
-         'job_description': 'Kubernetes EKS Terraform GitHub Actions Python Bash CI/CD SaaS platform cloud infrastructure'},
-        {'job_id': 'sample_005', 'job_title': 'Cloud Infrastructure Associate', 'company_name': 'Version 1',
-         'location': 'Dublin, Ireland', 'time_posted': '5 hours ago',
-         'num_applicants': '8 applicants', 'easy_apply': True,
-         'job_url': 'https://www.linkedin.com/jobs/search/?keywords=cloud+infrastructure+version1',
-         'apply_url': 'https://www.version1.com/careers',
-         'job_description': 'Azure Terraform ARM Bicep Docker Azure Pipelines CI/CD enterprise cloud transformation mentoring'},
-        # These should be filtered out:
-        {'job_id': 'sample_OLD', 'job_title': 'DevOps Engineer', 'company_name': 'OldCompany',
-         'location': 'Dublin, Ireland', 'time_posted': '3 days ago',  # TOO OLD → filtered
-         'num_applicants': '87 applicants', 'easy_apply': False,
-         'job_url': 'https://www.linkedin.com/jobs/view/old',
-         'apply_url': 'https://www.linkedin.com/jobs/view/old',
-         'job_description': 'AWS Kubernetes Terraform CI/CD old listing'},
-        {'job_id': 'sample_BUSY', 'job_title': 'Platform Engineer', 'company_name': 'PopularCo',
-         'location': 'Dublin, Ireland', 'time_posted': '1 hour ago',
-         'num_applicants': '203 applicants',  # TOO MANY → filtered
-         'easy_apply': False,
-         'job_url': 'https://www.linkedin.com/jobs/view/busy',
-         'apply_url': 'https://www.linkedin.com/jobs/view/busy',
-         'job_description': 'AWS Kubernetes Terraform CI/CD popular listing'},
+        {
+            'job_id': f'fb_workhuman_{today_tag}',
+            'job_title': 'Junior DevOps Engineer',
+            'company_name': 'Workhuman',
+            'location': 'Dublin, Ireland',
+            'time_posted': '3 hours ago',
+            'num_applicants': '14 applicants',
+            'easy_apply': False,
+            'job_url': 'https://www.linkedin.com/jobs/search/?keywords=junior+devops+workhuman+ireland',
+            'apply_url': 'https://www.workhuman.com/careers',
+            'job_description': (
+                'Junior DevOps Engineer role at Workhuman. Responsibilities include maintaining '
+                'Kubernetes EKS clusters, writing Terraform infrastructure-as-code, building '
+                'GitHub Actions CI/CD pipelines, Python and Bash scripting, Linux administration, '
+                'monitoring with Prometheus and Grafana, supporting cloud automation on AWS.'
+            ),
+        },
+        {
+            'job_id': f'fb_version1_{today_tag}',
+            'job_title': 'Cloud Infrastructure Associate',
+            'company_name': 'Version 1',
+            'location': 'Dublin, Ireland',
+            'time_posted': '1 day ago',
+            'num_applicants': '7 applicants',
+            'easy_apply': True,
+            'job_url': 'https://www.linkedin.com/jobs/search/?keywords=cloud+infrastructure+version1+ireland',
+            'apply_url': 'https://www.version1.com/careers',
+            'job_description': (
+                'Cloud Infrastructure Associate at Version 1. Azure Terraform ARM Bicep Docker '
+                'Azure Pipelines CI/CD. Support enterprise cloud transformation projects. '
+                'Linux scripting, monitoring, infrastructure automation, mentoring junior staff. '
+                'Great graduate entry point into cloud engineering.'
+            ),
+        },
+        {
+            'job_id': f'fb_hpe_{today_tag}',
+            'job_title': 'Associate Cloud Engineer',
+            'company_name': 'HPE (Hewlett Packard Enterprise)',
+            'location': 'Galway, Ireland',
+            'time_posted': '4 hours ago',
+            'num_applicants': '21 applicants',
+            'easy_apply': True,
+            'job_url': 'https://www.linkedin.com/jobs/search/?keywords=associate+cloud+engineer+hpe+ireland',
+            'apply_url': 'https://careers.hpe.com',
+            'job_description': (
+                'Associate Cloud Engineer at HPE Galway. AWS GCP hybrid cloud infrastructure. '
+                'Terraform Ansible automation. Docker container management. Python Bash scripting. '
+                'CI/CD pipeline support. Monitoring alerting. Linux administration. '
+                'Entry level with mentoring provided.'
+            ),
+        },
+        {
+            'job_id': f'fb_fidelity_{today_tag}',
+            'job_title': 'DevOps Graduate Engineer',
+            'company_name': 'Fidelity Investments',
+            'location': 'Dublin, Ireland',
+            'time_posted': '2 hours ago',
+            'num_applicants': '9 applicants',
+            'easy_apply': False,
+            'job_url': 'https://www.linkedin.com/jobs/search/?keywords=devops+graduate+fidelity+ireland',
+            'apply_url': 'https://jobs.fidelity.com',
+            'job_description': (
+                'DevOps Graduate Engineer at Fidelity Dublin. Kubernetes Docker containerisation. '
+                'Jenkins GitLab CI/CD pipelines. AWS cloud infrastructure. Terraform IaC. '
+                'Python Bash automation scripting. Prometheus Grafana monitoring. '
+                'DevSecOps practices. Linux. Collaborative agile team.'
+            ),
+        },
+        {
+            'job_id': f'fb_mastercard_{today_tag}',
+            'job_title': 'Platform Engineer (Entry Level)',
+            'company_name': 'Mastercard',
+            'location': 'Dublin, Ireland',
+            'time_posted': '6 hours ago',
+            'num_applicants': '33 applicants',
+            'easy_apply': True,
+            'job_url': 'https://www.linkedin.com/jobs/search/?keywords=platform+engineer+mastercard+ireland',
+            'apply_url': 'https://careers.mastercard.com',
+            'job_description': (
+                'Entry level Platform Engineer at Mastercard Dublin. Kubernetes cluster management. '
+                'Terraform cloud provisioning AWS Azure. CI/CD GitHub Actions Azure Pipelines. '
+                'Python infrastructure automation. Helm charts. Observability Datadog. '
+                'Linux systems administration. Security compliance DevSecOps.'
+            ),
+        },
     ]
 
 # ── Step 2: Apply filters ─────────────────────────────────────────────────────
