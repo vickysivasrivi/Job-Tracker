@@ -2,10 +2,12 @@ name: Daily DevOps Job Hunt
 
 on:
   schedule:
-    #  8:00 AM UTC = 9:00 AM Ireland (GMT+1)
-    #  Change to '0 7 * * *' if you want exactly 8am Irish time
-    - cron: '0 8 * * *'
-  workflow_dispatch:   # lets you trigger manually from GitHub Actions tab
+    - cron: '0 7 * * *'   # 7:00 AM UTC = 8:00 AM Ireland (UTC+1)
+  workflow_dispatch:       # Also run manually from GitHub Actions tab
+
+# Give the workflow permission to commit seen_jobs.json back to the repo
+permissions:
+  contents: write
 
 jobs:
   daily-automation:
@@ -13,18 +15,20 @@ jobs:
     timeout-minutes: 20
 
     steps:
-      - name: Checkout
+      - name: Checkout repo
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Python 3.11
+      - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
       - name: Install dependencies
-        run: pip install reportlab requests
+        run: pip install reportlab
 
-      - name: Run job automation
+      - name: Run daily job automation
         env:
           ANTHROPIC_KEY:  ${{ secrets.ANTHROPIC_KEY }}
           APIFY_TOKEN:    ${{ secrets.APIFY_TOKEN }}
@@ -37,3 +41,12 @@ jobs:
           MIN_SCORE:      ${{ vars.MIN_SCORE }}
           TOP_N:          ${{ vars.TOP_N }}
         run: python scripts/daily_automation.py
+
+      # Commit seen_jobs.json back to repo so duplicates are tracked across days
+      - name: Save seen jobs to repo
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add seen_jobs.json || true
+          git diff --staged --quiet || git commit -m "chore: update seen jobs [$(date -u '+%Y-%m-%d')]"
+          git push || true
