@@ -1,0 +1,39 @@
+name: Daily DevOps Job Hunt
+
+on:
+  schedule:
+    #  8:00 AM UTC = 9:00 AM Ireland (GMT+1)
+    #  Change to '0 7 * * *' if you want exactly 8am Irish time
+    - cron: '0 8 * * *'
+  workflow_dispatch:   # lets you trigger manually from GitHub Actions tab
+
+jobs:
+  daily-automation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install reportlab requests
+
+      - name: Run job automation
+        env:
+          ANTHROPIC_KEY:  ${{ secrets.ANTHROPIC_KEY }}
+          APIFY_TOKEN:    ${{ secrets.APIFY_TOKEN }}
+          EMAIL_FROM:     ${{ secrets.EMAIL_FROM }}
+          EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+          EMAIL_TO:       ${{ secrets.EMAIL_TO }}
+          YOUR_RESUME:    ${{ secrets.YOUR_RESUME }}
+          JOB_TITLE:      ${{ vars.JOB_TITLE }}
+          JOB_LOCATION:   ${{ vars.JOB_LOCATION }}
+          MIN_SCORE:      ${{ vars.MIN_SCORE }}
+          TOP_N:          ${{ vars.TOP_N }}
+        run: python scripts/daily_automation.py

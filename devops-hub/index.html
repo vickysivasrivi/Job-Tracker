@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DevOps Job Hub</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=Epilogue:wght@300;400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f5f3ee;--surf:#fff;--ink:#0e0d0b;--ink2:#5a5850;--ink3:#9c9890;
+  --b:rgba(14,13,11,.1);--b2:rgba(14,13,11,.22);
+  --gn:#1a6b3c;--gbg:#e8f5ee;--gb:#a8d4ba;
+  --am:#7a4f00;--abg:#fdf5e0;--abb:#e8cc80;
+  --rd:#8b1a1a;--rbg:#fdf0f0;--rbb:#f0b8b8;
+  --bl:#1a3d8b;--bbg:#eef3fd;--bbb:#b0c8f0;
+  --pu:#4a1880;--pbg:#f3eeff;--pbb:#c8a8f0;
+  --r:6px;--r2:12px
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Epilogue',sans-serif;background:var(--bg);color:var(--ink);font-size:14px;line-height:1.5;min-height:100vh}
+nav{background:var(--ink);height:52px;display:flex;align-items:center;padding:0 1.5rem;position:sticky;top:0;z-index:100}
+.brand{font-family:'Syne',sans-serif;font-weight:700;font-size:15px;color:#fff;margin-right:1.5rem;flex-shrink:0}
+.brand em{color:#6ee7a0;font-style:normal}
+.navlinks{display:flex;height:100%;overflow-x:auto;flex:1}
+.nl{display:flex;align-items:center;padding:0 14px;font-size:12px;font-weight:500;color:rgba(255,255,255,.5);cursor:pointer;border:none;background:none;border-bottom:2px solid transparent;margin-bottom:-1px;font-family:'Epilogue',sans-serif;white-space:nowrap;transition:all .15s}
+.nl:hover{color:rgba(255,255,255,.85)}.nl.on{color:#fff;border-bottom-color:#6ee7a0}
+.nbadge{background:#6ee7a0;color:var(--ink);border-radius:99px;padding:1px 6px;font-size:10px;font-weight:700;margin-left:4px;font-family:'JetBrains Mono',monospace}
+.nav-r{margin-left:auto;display:flex;align-items:center;gap:8px;flex-shrink:0;padding-left:12px}
+.api-dot{width:8px;height:8px;border-radius:50%;background:#555}
+.api-dot.ok{background:#6ee7a0}.api-dot.err{background:#f07070}
+.api-lbl{font-size:10px;font-family:'JetBrains Mono',monospace;color:rgba(255,255,255,.35)}
+.api-lbl.ok{color:#6ee7a0}.api-lbl.err{color:#f07070}
+.page{max-width:1160px;margin:0 auto;padding:1.5rem 1.5rem 4rem}
+.sec{display:none}.sec.on{display:block}
+.statsbar{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin-bottom:1.5rem}
+.stat{background:var(--surf);border:1px solid var(--b);border-radius:var(--r2);padding:13px 16px}
+.sl{font-size:10px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
+.sv{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:500}
+.sv.g{color:var(--gn)}.sv.a{color:var(--am)}.sv.b{color:var(--bl)}
+.btn{background:var(--ink);color:#fff;border:none;border-radius:var(--r);padding:8px 16px;font-size:12px;font-weight:600;cursor:pointer;font-family:'Epilogue',sans-serif;transition:opacity .15s;line-height:1}
+.btn:hover{opacity:.82}.btn:disabled{opacity:.3;cursor:not-allowed}
+.btn.sm{padding:5px 12px;font-size:11px}
+.btn.ghost{background:none;color:var(--ink);border:1px solid var(--b2)}.btn.ghost:hover{background:var(--bg)}
+.btn.green{background:var(--gn)}.btn.red{background:var(--rd)}.btn.blue{background:var(--bl)}
+.fetch-banner{background:var(--ink);border-radius:var(--r2);padding:14px 18px;margin-bottom:1.5rem;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.fb-l strong{font-family:'Syne',sans-serif;font-size:14px;font-weight:600;color:#fff;display:block;margin-bottom:2px}
+.fb-l span{font-size:11px;color:rgba(255,255,255,.4)}
+.fb-r{display:flex;gap:8px;align-items:center}
+.jobs-grid{display:grid;gap:12px}
+.jcard{background:var(--surf);border:1px solid var(--b);border-radius:var(--r2);overflow:hidden;transition:border-color .15s,transform .1s}
+.jcard:hover{border-color:var(--b2);transform:translateY(-1px)}
+.jbody{padding:16px 18px}
+.jrank{font-size:10px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:7px}
+.jhdr{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:5px}
+.jtitle{font-family:'Syne',sans-serif;font-size:15px;font-weight:600;letter-spacing:-.2px;line-height:1.25}
+.jco{font-size:12px;color:var(--ink2);margin-top:1px}
+.spill{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:500;padding:3px 9px;border-radius:99px;border:1px solid;white-space:nowrap;flex-shrink:0}
+.sp-h{background:var(--gbg);color:var(--gn);border-color:var(--gb)}
+.sp-m{background:var(--abg);color:var(--am);border-color:var(--abb)}
+.sp-l{background:#f5f4f0;color:var(--ink3);border-color:var(--b)}
+.jmeta{display:flex;gap:12px;font-size:11px;color:var(--ink2);margin-bottom:9px;flex-wrap:wrap}
+.jdesc{font-size:12px;color:var(--ink2);line-height:1.55;margin-bottom:11px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.jtags{margin-bottom:12px}
+.tag{display:inline-block;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:600;border:1px solid;margin-right:3px;margin-bottom:3px}
+.tt{background:var(--bbg);color:var(--bl);border-color:var(--bbb)}
+.tl{background:var(--pbg);color:var(--pu);border-color:var(--pbb)}
+.jacts{display:flex;gap:7px;align-items:center;flex-wrap:wrap}
+.applied-pill{font-size:10px;font-weight:700;color:var(--bl);background:var(--bbg);padding:3px 8px;border-radius:99px;border:1px solid var(--bbb);margin-left:auto}
+.easy-pill{font-size:10px;font-weight:700;color:var(--gn);background:var(--gbg);padding:3px 8px;border-radius:99px;border:1px solid var(--gb);margin-left:auto}
+.resume-panel{display:none;border-top:1px solid var(--b);background:var(--bg);padding:16px 18px}
+.rp-tabs{display:flex;gap:4px;margin-bottom:12px;flex-wrap:wrap}
+.rpt{padding:4px 12px;font-size:11px;font-weight:600;border-radius:99px;border:1px solid var(--b2);background:none;cursor:pointer;font-family:'Epilogue',sans-serif;color:var(--ink2);transition:all .12s}
+.rpt.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.rpc{display:none}.rpc.on{display:block}
+.rbox{background:var(--surf);border:1px solid var(--b);border-radius:var(--r);padding:13px;font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.85;color:var(--ink2);white-space:pre-wrap;max-height:340px;overflow-y:auto;margin-bottom:10px}
+.sec-lbl{font-size:10px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+.bullet{font-size:12px;color:var(--ink2);padding:3px 0 3px 14px;position:relative;line-height:1.5}
+.bullet::before{content:'›';position:absolute;left:0;color:var(--gn);font-weight:700}
+.gen-msg{display:flex;align-items:center;gap:10px;padding:16px;font-size:12px;color:var(--ink2)}
+.spin{width:14px;height:14px;border:2px solid var(--b);border-top-color:var(--ink);border-radius:50%;animation:sp .6s linear infinite;flex-shrink:0}
+@keyframes sp{to{transform:rotate(360deg)}}
+.err-msg{padding:12px 14px;font-size:12px;color:var(--rd);background:var(--rbg);border:1px solid var(--rbb);border-radius:var(--r);line-height:1.6}
+.err-msg a{color:var(--rd);font-weight:600}
+/* Agent steps */
+.agent-row{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:10px}
+.astep{display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:99px;font-size:10px;font-weight:600;border:1px solid var(--b);background:var(--bg);color:var(--ink3);transition:all .3s}
+.astep.run{border-color:var(--bbb);background:var(--bbg);color:var(--bl)}
+.astep.done{border-color:var(--gb);background:var(--gbg);color:var(--gn)}
+.astep.warn{border-color:var(--abb);background:var(--abg);color:var(--am)}
+.astep .adot{width:5px;height:5px;border-radius:50%;background:currentColor}
+.arr{font-size:10px;color:var(--ink3)}
+/* Verification */
+.vbox{margin-top:12px;border:1px solid var(--b);border-radius:var(--r);overflow:hidden}
+.vhdr{background:var(--bg);padding:8px 12px;font-size:11px;font-weight:700;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--b)}
+.vbadge{padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;border:1px solid}
+.v-ok{background:var(--gbg);color:var(--gn);border-color:var(--gb)}
+.v-warn{background:var(--abg);color:var(--am);border-color:var(--abb)}
+.v-err{background:var(--rbg);color:var(--rd);border-color:var(--rbb)}
+.vbody{padding:10px 12px}
+.vitem{font-size:12px;padding:4px 0;border-bottom:1px solid var(--b);display:flex;gap:8px;color:var(--ink2)}
+.vitem:last-child{border:none}
+.vdot{width:6px;height:6px;border-radius:50%;flex-shrink:0;margin-top:4px}
+.vdot.ok{background:var(--gn)}.vdot.warn{background:var(--am)}.vdot.err{background:var(--rd)}
+/* Section check */
+.sec-check{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:6px;margin-bottom:12px}
+.sc-item{padding:5px 9px;border-radius:var(--r);font-size:11px;font-weight:600;display:flex;align-items:center;gap:5px;border:1px solid}
+.sc-present{background:var(--gbg);color:var(--gn);border-color:var(--gb)}
+.sc-missing{background:var(--rbg);color:var(--rd);border-color:var(--rbb)}
+/* Tracker */
+.tbl-wrap{overflow-x:auto;border:1px solid var(--b);border-radius:var(--r2);background:var(--surf)}
+table{width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed}
+th{font-size:10px;font-weight:700;color:var(--ink3);text-align:left;padding:9px 13px;border-bottom:1px solid var(--b);white-space:nowrap;text-transform:uppercase;letter-spacing:.05em;background:var(--bg)}
+td{padding:10px 13px;border-bottom:1px solid var(--b);vertical-align:middle;word-break:break-word}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#fafaf8}
+.sbadge{display:inline-block;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;border:1px solid;white-space:nowrap}
+.s-applied{background:var(--bbg);color:var(--bl);border-color:var(--bbb)}
+.s-interview{background:var(--abg);color:var(--am);border-color:var(--abb)}
+.s-offer{background:var(--gbg);color:var(--gn);border-color:var(--gb)}
+.s-rejected{background:var(--rbg);color:var(--rd);border-color:var(--rbb)}
+.s-ghosted{background:#f5f4f0;color:var(--ink3);border-color:var(--b)}
+.s-saved{background:var(--pbg);color:var(--pu);border-color:var(--pbb)}
+.pipeline{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+.pcol{background:var(--surf);border:1px solid var(--b);border-radius:var(--r2);padding:11px}
+.phead{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink3);margin-bottom:8px;display:flex;justify-content:space-between}
+.pcount{font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:500}
+.pitem{background:var(--bg);border:1px solid var(--b);border-radius:var(--r);padding:8px 9px;margin-bottom:5px;cursor:pointer}
+.pitem:hover{border-color:var(--b2)}
+.pico{font-size:11px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pitl{font-size:10px;color:var(--ink2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:1px}
+.pidt{font-size:9px;color:var(--ink3);font-family:'JetBrains Mono',monospace;margin-top:3px}
+.tl-row{display:flex;gap:14px;margin-bottom:14px}
+.tl-dl{display:flex;flex-direction:column;align-items:center;flex-shrink:0}
+.tl-d{width:10px;height:10px;border-radius:50%}
+.tl-line{flex:1;width:1px;background:var(--b);margin-top:4px}
+.tl-b{flex:1;min-width:0;padding-bottom:4px}
+.tl-hdr{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;flex-wrap:wrap;margin-bottom:3px}
+.tl-meta{font-size:11px;color:var(--ink3);line-height:1.8}
+.mbg{display:none;position:fixed;inset:0;background:rgba(14,13,11,.5);z-index:200;align-items:center;justify-content:center;padding:1rem}
+.mbg.open{display:flex}
+.modal{background:var(--surf);border-radius:var(--r2);padding:22px;width:100%;max-width:560px;max-height:92vh;overflow-y:auto;border:1px solid var(--b)}
+.mtitle{font-family:'Syne',sans-serif;font-size:16px;font-weight:600;margin-bottom:16px}
+.fg2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.fg{display:flex;flex-direction:column;gap:4px;margin-bottom:8px}
+.fg label{font-size:10px;font-weight:700;color:var(--ink2);text-transform:uppercase;letter-spacing:.04em}
+.fg input,.fg select,.fg textarea{font-family:'Epilogue',sans-serif;font-size:13px;padding:7px 10px;border:1px solid var(--b);border-radius:var(--r);background:var(--surf);color:var(--ink);outline:none}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--ink)}
+.fg textarea{resize:vertical;min-height:65px}
+.setup-card{background:var(--surf);border:1px solid var(--b);border-radius:var(--r2);padding:18px 20px;margin-bottom:12px}
+.sc-title{font-family:'Syne',sans-serif;font-size:14px;font-weight:600;margin-bottom:10px}
+.info-box{background:var(--bbg);border:1px solid var(--bbb);border-radius:var(--r);padding:9px 12px;font-size:12px;color:var(--bl);line-height:1.6;margin-bottom:10px}
+.warn-box{background:var(--rbg);border:1px solid var(--rbb);border-radius:var(--r);padding:9px 12px;font-size:12px;color:var(--rd);line-height:1.6;margin-bottom:10px;display:none}
+.success-box{background:var(--gbg);border:1px solid var(--gb);border-radius:var(--r);padding:9px 12px;font-size:12px;color:var(--gn);line-height:1.6;margin-bottom:10px;display:none}
+.step-g{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px}
+.step{display:flex;align-items:center;gap:7px;padding:7px 11px;border:1px solid var(--b);border-radius:var(--r);font-size:11px;font-weight:500;color:var(--ink2);background:var(--bg)}
+.step.done{border-color:var(--gb);color:var(--gn);background:var(--gbg)}
+.step.run{border-color:var(--bbb);color:var(--bl);background:var(--bbg)}
+.step.err{border-color:var(--rbb);color:var(--rd);background:var(--rbg)}
+.snum{width:17px;height:17px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0;border:1.5px solid currentColor;font-family:'JetBrains Mono',monospace}
+.pbar{height:3px;background:var(--b);border-radius:2px;overflow:hidden;margin:8px 0}
+.pfill{height:100%;background:var(--ink);border-radius:2px;transition:width .5s ease}
+.flash{font-size:11px;font-weight:600;display:none}
+.key-row{display:flex;gap:8px;align-items:stretch;margin-bottom:8px}
+.key-row input{flex:1;font-family:'JetBrains Mono',monospace;font-size:12px;padding:8px 10px;border:1px solid var(--b);border-radius:var(--r);background:var(--surf);color:var(--ink);outline:none}
+.key-row input:focus{border-color:var(--ink)}
+.key-status{font-size:11px;font-family:'JetBrains Mono',monospace;padding:7px 10px;border-radius:var(--r);background:var(--bg);border:1px solid var(--b);margin-bottom:8px}
+.filters{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center}
+.filters select,.filters input{font-family:'Epilogue',sans-serif;font-size:12px;padding:6px 10px;border:1px solid var(--b);border-radius:var(--r);background:var(--surf);color:var(--ink);outline:none}
+.cnt{font-size:11px;color:var(--ink3);margin-left:auto}
+.empty{text-align:center;padding:3rem 1rem;color:var(--ink3);font-size:13px}
+.sec-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem;flex-wrap:wrap;gap:10px}
+.sec-title{font-family:'Syne',sans-serif;font-size:18px;font-weight:600;letter-spacing:-.3px}
+.sec-sub{font-size:12px;color:var(--ink2);margin-top:2px}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+@media(max-width:700px){
+  .statsbar{grid-template-columns:repeat(2,1fr)}
+  .pipeline{grid-template-columns:repeat(2,1fr)}
+  .fg2{grid-template-columns:1fr}
+  .step-g{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<nav>
+  <div class="brand">DevOps<em>Hub</em></div>
+  <div class="navlinks">
+    <button class="nl on" onclick="nav('jobs')">Today's Jobs <span class="nbadge" id="nb-jobs">4</span></button>
+    <button class="nl" onclick="nav('tracker')">Applications <span class="nbadge" id="nb-apps">0</span></button>
+    <button class="nl" onclick="nav('pipeline')">Pipeline</button>
+    <button class="nl" onclick="nav('timeline')">Timeline</button>
+    <button class="nl" onclick="nav('setup')">Setup</button>
+  </div>
+  <div class="nav-r">
+    <div class="api-dot" id="apiDot"></div>
+    <span class="api-lbl" id="apiLbl">checking…</span>
+  </div>
+</nav>
+
+<div class="page">
+  <div class="statsbar">
+    <div class="stat"><div class="sl">Jobs today</div><div class="sv" id="sJobs">4</div></div>
+    <div class="stat"><div class="sl">Applied</div><div class="sv b" id="sApplied">0</div></div>
+    <div class="stat"><div class="sl">Interviewing</div><div class="sv a" id="sInterview">0</div></div>
+    <div class="stat"><div class="sl">Offers</div><div class="sv g" id="sOffer">0</div></div>
+    <div class="stat"><div class="sl">Response rate</div><div class="sv" id="sRate">—</div></div>
+  </div>
+
+  <!-- JOBS -->
+  <div class="sec on" id="sec-jobs">
+    <div class="fetch-banner">
+      <div class="fb-l">
+        <strong>Today's DevOps matches — Ireland</strong>
+        <span>Entry &amp; Associate · fetched <span id="lastFetch">—</span></span>
+      </div>
+      <div class="fb-r">
+        <button class="btn sm ghost" style="color:#fff;border-color:rgba(255,255,255,.2)" onclick="nav('setup')">⚙ Setup</button>
+        <button class="btn sm green" onclick="softRefresh()">↺ Refresh</button>
+      </div>
+    </div>
+    <div class="sec-hdr">
+      <div>
+        <div class="sec-title">Top 4 matches</div>
+        <div class="sec-sub">3-agent pipeline: Tailor (honest rewrite) → Section check → PDF download</div>
+      </div>
+      <button class="btn ghost sm" onclick="autoAll()">Auto-generate all</button>
+    </div>
+    <div class="jobs-grid" id="jobsGrid"></div>
+  </div>
+
+  <!-- TRACKER -->
+  <div class="sec" id="sec-tracker">
+    <div class="sec-hdr">
+      <div><div class="sec-title">Applications</div><div class="sec-sub">All roles you're tracking</div></div>
+      <button class="btn" onclick="openModal()">+ Add</button>
+    </div>
+    <div class="filters">
+      <select id="stageFil" onchange="renderTracker()">
+        <option value="">All stages</option>
+        <option value="saved">Saved</option><option value="applied">Applied</option>
+        <option value="interview">Interview</option><option value="offer">Offer</option>
+        <option value="rejected">Rejected</option><option value="ghosted">Ghosted</option>
+      </select>
+      <input type="text" id="searchFil" placeholder="Search…" oninput="renderTracker()" style="min-width:150px">
+      <span class="cnt" id="tblCnt"></span>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr>
+          <th style="width:120px">Company</th><th style="width:145px">Role</th>
+          <th style="width:88px">Stage</th><th style="width:88px">Applied</th>
+          <th style="width:58px">Days</th><th style="width:110px">Resume used</th>
+          <th style="width:90px">Result</th><th style="width:80px">Actions</th>
+        </tr></thead>
+        <tbody id="tblBody"></tbody>
+      </table>
+    </div>
+    <div id="tblEmpty" class="empty" style="display:none">No applications yet.</div>
+  </div>
+
+  <!-- PIPELINE -->
+  <div class="sec" id="sec-pipeline">
+    <div class="sec-hdr"><div class="sec-title">Pipeline board</div></div>
+    <div class="pipeline" id="pipelineBoard"></div>
+  </div>
+
+  <!-- TIMELINE -->
+  <div class="sec" id="sec-timeline">
+    <div class="sec-hdr"><div class="sec-title">Timeline</div></div>
+    <div id="tlView"></div>
+    <div id="tlEmpty" class="empty" style="display:none">No applications yet.</div>
+  </div>
+
+  <!-- SETUP -->
+  <div class="sec" id="sec-setup">
+    <div class="sec-hdr"><div class="sec-title">Setup</div></div>
+    <div class="setup-card">
+      <div class="sc-title">Anthropic API key</div>
+      <div id="keySuccessBox" class="success-box">API key active — AI ready.</div>
+      <div id="keyWarnBox" class="warn-box"></div>
+      <div class="info-box">Get free key at <strong>console.anthropic.com → API Keys → Create key</strong></div>
+      <div class="key-status" id="keyStatus">checking…</div>
+      <div class="key-row">
+        <input type="password" id="keyInput" placeholder="sk-ant-api03-…" oninput="liveValidateKey()">
+        <button class="btn green" onclick="saveKey()">Save &amp; test</button>
+      </div>
+      <div class="row">
+        <span class="flash" id="keySaved" style="color:var(--gn)">Saved ✓</span>
+        <button class="btn sm ghost" onclick="testKey()" id="testBtn" style="display:none">Test now</button>
+      </div>
+    </div>
+    <div class="setup-card">
+      <div class="sc-title">Your resume</div>
+      <div class="info-box">
+        Paste your <strong>complete CV text</strong> — all sections including Projects and Education. The agent will preserve every section and only reword existing content to match the job. Nothing will be invented.
+      </div>
+      <div class="fg">
+        <label>Full resume / CV text (paste everything)</label>
+        <textarea id="cvText" style="min-height:180px" placeholder="Paste your full CV here including all sections:&#10;- Contact info&#10;- Profile/Summary&#10;- Work Experience&#10;- Projects&#10;- Education&#10;- Skills&#10;- Certifications&#10;&#10;The more complete your CV, the better the tailoring."></textarea>
+      </div>
+      <div class="row">
+        <button class="btn" onclick="saveCV()">Save resume</button>
+        <span class="flash" id="cvSaved" style="color:var(--gn)">Saved ✓</span>
+      </div>
+    </div>
+    <div class="setup-card">
+      <div class="sc-title">How the 3-agent pipeline works</div>
+      <div style="display:grid;gap:8px">
+        <div style="padding:10px 12px;background:var(--bbg);border:1px solid var(--bbb);border-radius:var(--r);font-size:12px;color:var(--bl);line-height:1.6">
+          <strong>Agent 1 — Honest tailoring:</strong> Rewrites every section of your resume to better match the job description — reordering, rewording, and emphasising relevant skills you already have. Strictly forbidden from adding anything new.
+        </div>
+        <div style="padding:10px 12px;background:var(--abg);border:1px solid var(--abb);border-radius:var(--r);font-size:12px;color:var(--am);line-height:1.6">
+          <strong>Agent 2 — Section checker:</strong> Compares every section in your original CV against the tailored version. Flags any missing section (Projects, Education, etc.) and restores it from your original. Shows a green/red section audit.
+        </div>
+        <div style="padding:10px 12px;background:var(--gbg);border:1px solid var(--gb);border-radius:var(--r);font-size:12px;color:var(--gn);line-height:1.6">
+          <strong>Agent 3 — PDF formatter:</strong> Produces a clean A4 PDF with proper sections. Download button works immediately — no Python or external tools required.
+        </div>
+      </div>
+    </div>
+    <div class="setup-card">
+      <div class="sc-title">Auto-generate all resumes</div>
+      <div class="step-g">
+        <div class="step" id="st1"><div class="snum">1</div>Tailor (honest)</div>
+        <div class="step" id="st2"><div class="snum">2</div>Check sections</div>
+        <div class="step" id="st3"><div class="snum">3</div>Format PDF</div>
+        <div class="step" id="st4"><div class="snum">4</div>Download ready</div>
+      </div>
+      <div id="autoWrap" style="display:none;margin-bottom:10px">
+        <div class="pbar"><div class="pfill" id="autoPf" style="width:0%"></div></div>
+        <div style="font-size:11px;color:var(--ink3);margin-top:3px;font-family:'JetBrains Mono',monospace" id="autoPl"></div>
+      </div>
+      <button class="btn green" id="autoBtn" onclick="autoAll()">Auto-generate all resumes</button>
+    </div>
+    <div class="setup-card">
+      <div class="sc-title">Daily schedule</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+        <div class="fg"><label>Run time</label><input type="time" id="schedTime" value="08:00"></div>
+        <div class="fg"><label>Days</label>
+          <select id="schedDays"><option value="daily">Every day</option><option value="weekdays">Weekdays only</option></select>
+        </div>
+      </div>
+      <div class="row">
+        <button class="btn green" id="schedBtn" onclick="activateSched()">Activate schedule</button>
+        <button class="btn ghost sm red" id="stopBtn" onclick="stopSched()" style="display:none">Stop</button>
+        <span style="font-size:11px;color:var(--ink3);font-family:'JetBrains Mono',monospace" id="schedSt"></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="mbg" id="modal">
+  <div class="modal">
+    <div class="mtitle" id="mTitle">Add application</div>
+    <div class="fg2">
+      <div class="fg"><label>Company *</label><input id="mCo"></div>
+      <div class="fg"><label>Role *</label><input id="mRole"></div>
+    </div>
+    <div class="fg2">
+      <div class="fg"><label>Location</label><input id="mLoc" value="Dublin, Ireland"></div>
+      <div class="fg"><label>Stage</label>
+        <select id="mStage">
+          <option value="saved">Saved</option><option value="applied" selected>Applied</option>
+          <option value="interview">Interview</option><option value="offer">Offer</option>
+          <option value="rejected">Rejected</option><option value="ghosted">Ghosted</option>
+        </select>
+      </div>
+    </div>
+    <div class="fg2">
+      <div class="fg"><label>Date applied</label><input type="date" id="mDate"></div>
+      <div class="fg"><label>Job URL</label><input id="mUrl"></div>
+    </div>
+    <div class="fg2">
+      <div class="fg"><label>Salary</label><input id="mSal"></div>
+      <div class="fg"><label>Result</label><input id="mRes" placeholder="Phone screen booked"></div>
+    </div>
+    <div class="fg"><label>Resume version used</label><input id="mResV"></div>
+    <div class="fg"><label>Notes</label><textarea id="mNotes"></textarea></div>
+    <input type="hidden" id="mId">
+    <div class="row" style="margin-top:14px">
+      <button class="btn" onclick="saveApp()">Save</button>
+      <button class="btn ghost" onclick="closeModal()">Cancel</button>
+      <span class="flash" id="appFlash" style="color:var(--gn)">Saved ✓</span>
+    </div>
+  </div>
+</div>
+
+<script>
+const JOBS=[
+  {id:"4384547978",title:"DevOps Engineer — The Dock",company:"Accenture",loc:"Dublin, Ireland",type:"Full-time",level:"Entry level",posted:"2 days ago",apps:103,easy:false,url:"https://www.linkedin.com/jobs/view/4384547978",applyUrl:"https://www.accenture.com/ie-en/careers/jobdetails?id=R00316490_en",salary:"Competitive + pension",tags:["Azure","Terraform","GitLab CI","Kubernetes","Python","DevSecOps"],desc:"Accenture R&D lab (The Dock), Dublin. Azure DevOps + GitLab CI, Terraform, Docker/Kubernetes AKS, Python/Bash, DevSecOps. Pension, private health, employee shares."},
+  {id:"4385105554",title:"Software Cloud Engineer II — IoT",company:"Medtronic",loc:"Galway, Ireland",type:"Full-time",level:"Entry level",posted:"1 day ago",apps:27,easy:false,url:"https://www.linkedin.com/jobs/view/4385105554",applyUrl:"https://medtronic.wd1.myworkdayjobs.com/MedtronicCareers/job/Galway-County-Galway-Ireland/Software-Cloud-Engineer-II---IoT_R61276-1",salary:"€48,000–€72,000",tags:["AWS","Docker","Kubernetes","Azure DevOps","CI/CD",".NET"],desc:"Cloud-native software for cardiac medical devices. AWS S3, Docker, Kubernetes, Azure DevOps CI/CD, .NET microservices. €48k–€72k + bonus."},
+  {id:"4372752882",title:"Cloud DevOps Engineer",company:"Talent Partners (Client)",loc:"Dublin, Ireland",type:"Full-time",level:"Entry level",posted:"1 week ago",apps:194,easy:false,url:"https://www.linkedin.com/jobs/view/4372752882",applyUrl:"https://www.talentpartners.ie/current-openings",salary:"TBC",tags:["Azure","AKS","Kubernetes","Helm","Jenkins","CI/CD"],desc:"Azure AKS, Kubernetes + Helm, Jenkins CI/CD, Graylog observability, Keycloak IAM. Hybrid Dublin. Full ownership of cloud infra for analytics platform."},
+  {id:"4373819145",title:"Database Engineer (Postgres + AWS)",company:"SoSafe",loc:"Ireland (Remote)",type:"Full-time",level:"Entry level",posted:"4 days ago",apps:62,easy:false,url:"https://www.linkedin.com/jobs/view/4373819145",applyUrl:"https://jobs.ashbyhq.com/sosafe/9ac62265-6a1c-43ea-b81a-a2d93155c9cf/application",salary:"Competitive + 33 days",tags:["AWS","PostgreSQL","RDS","Aurora","GitHub Actions","CI/CD"],desc:"PostgreSQL on AWS RDS/Aurora, CloudWatch, GitHub Actions CI/CD, Lambda, S3. Cybersecurity scale-up. Fully remote from Ireland. 33 vacation days."}
+];
+
+const STLABEL={saved:"Saved",applied:"Applied",interview:"Interview",offer:"Offer",rejected:"Rejected",ghosted:"Ghosted"};
+const STCLS={saved:"s-saved",applied:"s-applied",interview:"s-interview",offer:"s-offer",rejected:"s-rejected",ghosted:"s-ghosted"};
+const STCOL={saved:"#7F77DD",applied:"#378ADD",interview:"#BA7517",offer:"#1a6b3c",rejected:"#8b1a1a",ghosted:"#888"};
+const API='http://localhost:3747';
+
+let cv=localStorage.getItem('dh_cv')||'';
+let apps=JSON.parse(localStorage.getItem('dh_apps')||'[]');
+let scores={},tailored={},sched=null,editId=null;
+
+window.onload=()=>{
+  if(cv)document.getElementById('cvText').value=cv;
+  document.getElementById('mDate').value=today();
+  renderJobs();updateStats();updateBadges();
+  document.getElementById('lastFetch').textContent=new Date().toLocaleTimeString('en-IE',{hour:'2-digit',minute:'2-digit'});
+  checkAPI();setInterval(checkAPI,15000);
+};
+
+async function checkAPI(){
+  const dot=document.getElementById('apiDot'),lbl=document.getElementById('apiLbl');
+  try{
+    const r=await fetch(API+'/api/config',{signal:AbortSignal.timeout(4000)});
+    const d=await r.json();
+    if(d.hasKey){
+      dot.className='api-dot ok';lbl.className='api-lbl ok';lbl.textContent='AI ready';
+      document.getElementById('keyStatus').textContent='Key loaded: '+d.keyPreview;
+      document.getElementById('keySuccessBox').style.display='block';
+      document.getElementById('testBtn').style.display='inline-flex';
+    }else{
+      dot.className='api-dot err';lbl.className='api-lbl err';lbl.textContent='No key';
+      document.getElementById('keyStatus').textContent='No API key — add one in Setup';
+      document.getElementById('keySuccessBox').style.display='none';
+    }
+  }catch{
+    dot.className='api-dot err';lbl.className='api-lbl err';lbl.textContent='Offline';
+    document.getElementById('keyStatus').textContent='Server not running — double-click START.command / START.bat';
+  }
+}
+
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
+function today(){return new Date().toISOString().slice(0,10);}
+function fmtD(d){if(!d)return'—';return new Date(d+'T12:00:00').toLocaleDateString('en-IE',{day:'numeric',month:'short',year:'numeric'});}
+function daysAgo(d){if(!d)return null;return Math.floor((Date.now()-new Date(d+'T12:00:00'))/86400000);}
+
+function nav(t){
+  document.querySelectorAll('.nl').forEach((el,i)=>el.classList.toggle('on',['jobs','tracker','pipeline','timeline','setup'][i]===t));
+  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('on'));
+  document.getElementById('sec-'+t).classList.add('on');
+  if(t==='tracker')renderTracker();
+  if(t==='pipeline')renderPipeline();
+  if(t==='timeline')renderTimeline();
+}
+
+function getScore(j){
+  if(scores[j.id]!==undefined)return scores[j.id];
+  const kw=['terraform','kubernetes','docker','ci/cd','aws','azure','gcp','python','bash','linux','ansible','jenkins','gitlab','github actions','prometheus','grafana','argocd','helm','cloudformation','devops','devsecops','monitoring','postgres','rds','lambda'];
+  const txt=(j.desc+' '+j.tags.join(' ')).toLowerCase();
+  let s=50;kw.forEach(k=>{if(txt.includes(k))s+=3;});
+  if(j.easy)s+=4;if(j.apps<40)s+=7;else if(j.apps>100)s-=6;
+  return Math.min(97,Math.max(42,s));
+}
+
+function renderJobs(){
+  const sorted=[...JOBS].sort((a,b)=>getScore(b)-getScore(a));
+  document.getElementById('jobsGrid').innerHTML=sorted.map((j,i)=>cardHTML(j,i)).join('');
+}
+
+function cardHTML(j,rank){
+  const sc=getScore(j);
+  const sp=sc>=75?'sp-h':sc>=58?'sp-m':'sp-l';
+  const d=tailored[j.id];
+  const done=d&&d.pdfData;
+  const wasApplied=apps.some(a=>a.jobId===j.id);
+  return`<div class="jcard" id="jcard-${j.id}">
+    <div class="jbody">
+      <div class="jrank">#${rank+1} match · ${j.level}</div>
+      <div class="jhdr">
+        <div><div class="jtitle">${j.title}</div><div class="jco">${j.company} · ${j.loc}</div></div>
+        <span class="spill ${sp}">${sc}%</span>
+      </div>
+      <div class="jmeta"><span>${j.type}</span><span>🕐 ${j.posted}</span><span>👥 ${j.apps} applicants</span>${j.salary?`<span>💶 ${j.salary}</span>`:''}</div>
+      <div class="jdesc">${j.desc}</div>
+      <div class="jtags">${j.tags.map(t=>`<span class="tag tt">${t}</span>`).join('')}<span class="tag tl">${j.level}</span></div>
+      <div class="jacts">
+        <a href="${j.applyUrl||j.url}" target="_blank"><button class="btn sm green" onclick="markApplied('${j.id}')">Apply ↗</button></a>
+        <button class="btn sm ghost" id="rbtn-${j.id}" onclick="toggleResume('${j.id}')">${done?'View resume':'Generate resume'}</button>
+        ${done?`<button class="btn sm blue" id="pdfbtn-${j.id}" onclick="downloadPDF('${j.id}')">⬇ Download PDF</button>`:''}
+        ${wasApplied?'<span class="applied-pill">✓ Applied</span>':(j.easy?'<span class="easy-pill">⚡ Easy Apply</span>':'')}
+      </div>
+    </div>
+    <div class="resume-panel" id="rp-${j.id}"><div id="rc-${j.id}"></div></div>
+  </div>`;
+}
+
+// ── Claude helper ─────────────────────────────────────────────────────────────
+async function callClaude(payload){
+  const r=await fetch(API+'/api/claude',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+  const d=await r.json();
+  if(d.type==='error'||d.error){
+    const msg=typeof d.error==='object'?(d.error.message||JSON.stringify(d.error)):String(d.error);
+    throw new Error(msg);
+  }
+  const text=(d.content||[]).filter(c=>c.type==='text').map(c=>c.text).join('');
+  if(!text)throw new Error('Empty response — check API key in Setup.');
+  return text;
+}
+
+function setA(id,step,state){const el=document.getElementById('a-'+id+'-'+step);if(el)el.className='astep '+state;}
+
+// ── 3-AGENT PIPELINE ─────────────────────────────────────────────────────────
+async function runPipeline(jobId){
+  const job=JOBS.find(j=>j.id===jobId);
+  const resume=cv||'DevOps Engineer, 3 years experience, AWS, Kubernetes, Docker, CI/CD, Python, Bash.';
+
+  // ── AGENT 1: Honest tailoring ─────────────────────────────────────────────
+  setA(jobId,'1','run');
+  const a1txt=await callClaude({model:'claude-sonnet-4-20250514',max_tokens:2000,
+    system:`You are a CV tailoring assistant. Your ONLY job is to reword and reorder the candidate's EXISTING resume content to better match a job description.
+
+STRICT RULES:
+1. NEVER add any skill, tool, technology, qualification, company, project, or experience that is not already present in the original resume.
+2. NEVER invent or exaggerate. Only reword, reorder, emphasise.
+3. KEEP EVERY SECTION from the original (Profile, Experience, Projects, Education, Skills, Certifications, etc.). Do not drop any section.
+4. Match language and keywords from the job description ONLY where the candidate already has that skill.
+5. Return clean JSON only, no markdown.`,
+    messages:[{role:'user',content:
+      `Original resume:\n${resume}\n\n`+
+      `Target job: ${job.title} at ${job.company}\n`+
+      `Job description: ${job.desc}\nJob skills: ${job.tags.join(', ')}\n\n`+
+      `Return this JSON — preserve ALL sections from the original resume:\n`+
+      `{"sections":[{"name":"section name from original","originalContent":"what was in the original","tailoredContent":"reworded version"}]}`
+    }]
+  });
+  const a1=JSON.parse(a1txt.replace(/```json|```/g,'').trim());
+  setA(jobId,'1','done');
+
+  // ── AGENT 2: Section completeness check ───────────────────────────────────
+  setA(jobId,'2','run');
+  const a2txt=await callClaude({model:'claude-sonnet-4-20250514',max_tokens:2000,
+    system:`You are a resume section auditor. Compare the original CV sections against the tailored sections.
+Check every section is present. If any section from the original is missing from the tailored version, restore it.
+Return clean JSON only, no markdown.`,
+    messages:[{role:'user',content:
+      `Original resume:\n${resume}\n\n`+
+      `Tailored sections (Agent 1 output):\n${JSON.stringify(a1.sections)}\n\n`+
+      `Return this JSON:\n`+
+      `{"sectionAudit":[{"name":"section name","status":"present|missing|restored","note":"brief note"}],`+
+      `"finalSections":[{"name":"section name","content":"final content to use in PDF"}],`+
+      `"summary":"one sentence verdict"}`
+    }]
+  });
+  const a2=JSON.parse(a2txt.replace(/```json|```/g,'').trim());
+  setA(jobId,'2','done');
+
+  // ── AGENT 3: PDF structure builder ───────────────────────────────────────
+  setA(jobId,'3','run');
+  const a3txt=await callClaude({model:'claude-sonnet-4-20250514',max_tokens:2000,
+    system:`You convert a verified resume into structured JSON for PDF generation.
+Rules: Preserve every section. Format experience and project entries with role/company/period/bullets. Return clean JSON only, no markdown.`,
+    messages:[{role:'user',content:
+      `Verified sections:\n${JSON.stringify(a2.finalSections)}\n\n`+
+      `Extract the candidate name and contact from this original resume:\n${resume.slice(0,500)}\n\n`+
+      `Return this JSON:\n`+
+      `{"name":"full name","contact":"email | phone | location | linkedin","sections":[`+
+      `{"title":"SECTION TITLE","content":["string for plain sections" OR {"role":"","company":"","period":"","bullets":["..."]} for experience/projects/education]}]}`
+    }]
+  });
+  const pdfData=JSON.parse(a3txt.replace(/```json|```/g,'').trim());
+  setA(jobId,'3','done');
+
+  return { a1, a2, pdfData };
+}
+
+// ── Toggle resume panel ───────────────────────────────────────────────────────
+function toggleResume(id){
+  const panel=document.getElementById('rp-'+id);
+  const btn=document.getElementById('rbtn-'+id);
+  if(panel.style.display==='block'){panel.style.display='none';return;}
+  if(tailored[id]&&tailored[id].pdfData){panel.style.display='block';drawResume(id);return;}
+  if(!cv){alert('Please paste your resume in the Setup tab first.');nav('setup');return;}
+
+  panel.style.display='block';
+  document.getElementById('rc-'+id).innerHTML=`
+    <div class="agent-row">
+      <div class="astep" id="a-${id}-1"><div class="adot"></div>Agent 1: Tailor</div>
+      <div class="arr">›</div>
+      <div class="astep" id="a-${id}-2"><div class="adot"></div>Agent 2: Section check</div>
+      <div class="arr">›</div>
+      <div class="astep" id="a-${id}-3"><div class="adot"></div>Agent 3: Build PDF</div>
+    </div>
+    <div class="gen-msg"><div class="spin"></div>Running 3-agent pipeline — ~30–45 seconds…</div>`;
+  btn.textContent='Running…';btn.disabled=true;
+
+  const job=JOBS.find(j=>j.id===id);
+  runPipeline(id).then(result=>{
+    tailored[id]=result;
+    drawResume(id);
+    btn.textContent='View resume';btn.disabled=false;
+    const sorted=[...JOBS].sort((a,b)=>getScore(b)-getScore(a));
+    const rank=sorted.findIndex(j=>j.id===id);
+    document.getElementById('jcard-'+id).outerHTML=cardHTML(job,rank);
+    document.getElementById('rp-'+id).style.display='block';
+    drawResume(id);
+  }).catch(e=>{
+    const isKey=/(credit|key|auth|billing)/i.test(e.message);
+    document.getElementById('rc-'+id).innerHTML=
+      `<div class="err-msg"><strong>${e.message}</strong><br><br>`+
+      (isKey?`Go to <a href="#" onclick="nav('setup');return false">Setup</a> and check your API key.`
+            :`Make sure the server is running (START.command / START.bat).`)+
+      `</div>`;
+    btn.textContent='Generate resume';btn.disabled=false;
+  });
+}
+
+function drawResume(id){
+  const d=tailored[id];if(!d)return;
+  const rc=document.getElementById('rc-'+id);if(!rc)return;
+  const audit=d.a2&&d.a2.sectionAudit||[];
+  const missing=audit.filter(s=>s.status==='missing');
+  const restored=audit.filter(s=>s.status==='restored');
+  const present=audit.filter(s=>s.status==='present');
+
+  // Build full resume text for preview
+  const fullText=(d.a2&&d.a2.finalSections||[]).map(s=>`${s.name.toUpperCase()}\n${s.content}`).join('\n\n');
+
+  rc.innerHTML=`
+    <div class="agent-row">
+      <div class="astep done" id="a-${id}-1"><div class="adot"></div>Agent 1: Tailored ✓</div>
+      <div class="arr">›</div>
+      <div class="astep ${missing.length?'warn':'done'}" id="a-${id}-2"><div class="adot"></div>Agent 2: ${missing.length?missing.length+' restored':'All sections ✓'}</div>
+      <div class="arr">›</div>
+      <div class="astep done" id="a-${id}-3"><div class="adot"></div>Agent 3: PDF ready ✓</div>
+    </div>
+    <div class="rp-tabs">
+      <button class="rpt on" onclick="rTab('${id}','r')">Resume preview</button>
+      <button class="rpt" onclick="rTab('${id}','c')">Section audit</button>
+    </div>
+    <div class="rpc on" id="rpc-r-${id}">
+      <div class="rbox">${fullText.replace(/</g,'&lt;')}</div>
+      <div class="row">
+        <button class="btn sm ghost" onclick="copyResume('${id}')">Copy text</button>
+        <button class="btn sm blue" onclick="downloadPDF('${id}')">⬇ Download PDF</button>
+        <span class="flash" id="cpfl-${id}" style="color:var(--gn)">Copied!</span>
+      </div>
+    </div>
+    <div class="rpc" id="rpc-c-${id}">
+      <div class="sec-lbl">Section audit — every section from your original CV</div>
+      <div class="sec-check">
+        ${audit.map(s=>`<div class="sc-item ${s.status==='missing'?'sc-missing':'sc-present'}">
+          <span>${s.status==='present'||s.status==='restored'?'✓':'✗'}</span>
+          <span>${s.name}</span>
+        </div>`).join('')}
+      </div>
+      ${d.a2&&d.a2.summary?`<div style="font-size:12px;color:var(--ink2);padding:6px 0;line-height:1.55">${d.a2.summary}</div>`:''}
+      ${restored.length?`<div style="font-size:12px;color:var(--am);margin-top:6px">Sections restored from original: ${restored.map(s=>s.name).join(', ')}</div>`:''}
+    </div>`;
+}
+
+function rTab(id,t){
+  ['r','c'].forEach(x=>{const el=document.getElementById('rpc-'+x+'-'+id);if(el)el.classList.toggle('on',x===t);});
+  const rc=document.getElementById('rc-'+id);
+  if(rc)rc.querySelectorAll('.rpt').forEach((el,i)=>el.classList.toggle('on',['r','c'][i]===t));
+}
+
+function copyResume(id){
+  const d=tailored[id];if(!d)return;
+  const text=(d.a2&&d.a2.finalSections||[]).map(s=>s.name.toUpperCase()+'\n'+s.content).join('\n\n');
+  navigator.clipboard.writeText(text).then(()=>{
+    const el=document.getElementById('cpfl-'+id);
+    if(el){el.style.display='inline';setTimeout(()=>el.style.display='none',2000);}
+  });
+}
+
+async function downloadPDF(id){
+  const d=tailored[id];if(!d||!d.pdfData){alert('Run "Generate resume" first.');return;}
+  const job=JOBS.find(j=>j.id===id);
+  const btn=document.getElementById('pdfbtn-'+id)||event.target;
+  const orig=btn.textContent;
+  btn.textContent='Building PDF…';btn.disabled=true;
+  try{
+    const r=await fetch(API+'/api/generate-pdf',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d.pdfData)});
+    if(!r.ok){const e=await r.json();throw new Error(e.error||'PDF failed');}
+    const blob=await r.blob();
+    const name=`Resume_${(job?.company||'Co').replace(/\W+/g,'_')}_${(job?.title||'Role').split(' ').slice(0,2).join('_')}.pdf`;
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();
+    btn.textContent=orig;btn.disabled=false;
+  }catch(e){
+    alert('PDF error: '+e.message);
+    btn.textContent=orig;btn.disabled=false;
+  }
+}
+
+// ── Auto-generate all ─────────────────────────────────────────────────────────
+async function autoAll(){
+  if(!cv){alert('Paste your resume in Setup first.');nav('setup');return;}
+  const btn=document.getElementById('autoBtn');
+  btn.disabled=true;btn.textContent='Running pipeline…';
+  document.getElementById('autoWrap').style.display='block';
+  const ss=(n,s)=>{const el=document.getElementById('st'+n);el.className='step '+(s==='done'?'done':s==='run'?'run':s==='err'?'err':'');el.querySelector('.snum').textContent=s==='done'?'✓':s==='err'?'✗':n;};
+  const sorted=[...JOBS].sort((a,b)=>getScore(b)-getScore(a));
+  ss(1,'run');setProg(5,'Starting…');
+  let ok=0;
+  for(let i=0;i<sorted.length;i++){
+    const job=sorted[i];
+    setProg(5+(i/sorted.length)*85,`[${i+1}/${sorted.length}] ${job.company}: Tailor → Check → PDF…`);
+    if(!tailored[job.id]||!tailored[job.id].pdfData){
+      try{ tailored[job.id]=await runPipeline(job.id); ok++; }
+      catch(e){ console.error(job.company,e.message); }
+    }else ok++;
+    await delay(300);
+  }
+  ss(1,'done');ss(2,'done');ss(3,'done');ss(4,ok>0?'done':'err');
+  setProg(100,ok===sorted.length?`All ${ok} resumes ready!`:`${ok}/${sorted.length} ready.`);
+  btn.disabled=false;btn.textContent='Regenerate all';
+  renderJobs();
+}
+
+function setProg(p,l){document.getElementById('autoPf').style.width=p+'%';document.getElementById('autoPl').textContent=l;}
+function delay(ms){return new Promise(r=>setTimeout(r,ms));}
+
+function markApplied(jobId){
+  if(apps.some(a=>a.jobId===jobId))return;
+  const j=JOBS.find(x=>x.id===jobId);
+  apps.push({id:uid(),jobId,company:j.company,title:j.title,loc:j.loc,
+    stage:'applied',dateApplied:today(),url:j.applyUrl||j.url,salary:j.salary,
+    resumeName:tailored[jobId]?`Resume_${j.company.replace(/\W+/g,'_')}_v1`:'',
+    notes:'',result:'',lastUpdated:today(),createdAt:today()});
+  saveApps();updateStats();updateBadges();renderJobs();
+}
+
+function renderTracker(){
+  const sf=document.getElementById('stageFil').value;
+  const sq=(document.getElementById('searchFil').value||'').toLowerCase();
+  const rows=apps.filter(a=>{if(sf&&a.stage!==sf)return false;if(sq&&!a.company.toLowerCase().includes(sq)&&!a.title.toLowerCase().includes(sq))return false;return true;}).sort((a,b)=>(b.dateApplied||'').localeCompare(a.dateApplied||''));
+  document.getElementById('tblCnt').textContent=rows.length+' application'+(rows.length!==1?'s':'');
+  document.getElementById('tblEmpty').style.display=rows.length?'none':'block';
+  document.getElementById('tblBody').innerHTML=rows.map(a=>{
+    const ds=daysAgo(a.dateApplied);
+    return`<tr>
+      <td style="font-weight:500">${a.company}<br><span style="font-size:10px;color:var(--ink3)">${a.loc||''}</span></td>
+      <td>${a.title}</td>
+      <td><span class="sbadge ${STCLS[a.stage]||'s-applied'}">${STLABEL[a.stage]||a.stage}</span></td>
+      <td style="font-size:11px">${fmtD(a.dateApplied)}</td>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink3)">${ds!==null?ds+'d':'—'}</td>
+      <td style="font-size:11px;color:var(--bl);max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${a.resumeName||''}">${a.resumeName||'—'}</td>
+      <td style="font-size:11px;color:var(--ink2)">${a.result||'—'}</td>
+      <td><div class="row" style="gap:4px">
+        <button class="btn sm ghost" onclick="editApp('${a.id}')">Edit</button>
+        ${a.url?`<a href="${a.url}" target="_blank"><button class="btn sm ghost">↗</button></a>`:''}
+        <button class="btn sm red" onclick="delApp('${a.id}')">×</button>
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+
+function renderPipeline(){
+  document.getElementById('pipelineBoard').innerHTML=['saved','applied','interview','offer','rejected'].map(s=>{
+    const items=apps.filter(a=>a.stage===s);
+    return`<div class="pcol">
+      <div class="phead"><span>${STLABEL[s]}</span><span class="pcount" style="color:${STCOL[s]}">${items.length}</span></div>
+      ${items.length?items.map(a=>`<div class="pitem" onclick="editApp('${a.id}')"><div class="pico">${a.company}</div><div class="pitl">${a.title}</div><div class="pidt">${fmtD(a.dateApplied)}</div></div>`).join(''):'<div style="font-size:10px;color:var(--ink3);padding:4px 0">None yet</div>'}
+    </div>`;
+  }).join('');
+}
+
+function renderTimeline(){
+  const sorted=[...apps].filter(a=>a.dateApplied).sort((a,b)=>b.dateApplied.localeCompare(a.dateApplied));
+  document.getElementById('tlEmpty').style.display=sorted.length?'none':'block';
+  document.getElementById('tlView').innerHTML=sorted.map((a,i)=>`
+    <div class="tl-row">
+      <div class="tl-dl"><div class="tl-d" style="background:${STCOL[a.stage]||'#888'}"></div>${i<sorted.length-1?'<div class="tl-line"></div>':''}</div>
+      <div class="tl-b">
+        <div class="tl-hdr">
+          <div><span style="font-size:13px;font-weight:600">${a.company}</span><span style="font-size:12px;color:var(--ink2)"> — ${a.title}</span></div>
+          <span class="sbadge ${STCLS[a.stage]||'s-applied'}">${STLABEL[a.stage]||a.stage}</span>
+        </div>
+        <div class="tl-meta">Applied: ${fmtD(a.dateApplied)}${a.resumeName?` · Resume: <span style="color:var(--bl)">${a.resumeName}</span>`:''}${a.salary?` · ${a.salary}`:''}${a.result?` · <span style="color:var(--gn)">${a.result}</span>`:''}${a.url?` · <a href="${a.url}" target="_blank" style="color:var(--bl)">View job ↗</a>`:''}${a.notes?`<br><span style="color:var(--ink3)">${a.notes}</span>`:''}</div>
+      </div>
+    </div>`).join('');
+}
+
+function updateStats(){
+  const applied=apps.filter(a=>a.stage!=='saved').length;
+  const interview=apps.filter(a=>a.stage==='interview').length;
+  const offer=apps.filter(a=>a.stage==='offer').length;
+  const resp=apps.filter(a=>['interview','offer','rejected'].includes(a.stage)).length;
+  document.getElementById('sApplied').textContent=applied;
+  document.getElementById('sInterview').textContent=interview;
+  document.getElementById('sOffer').textContent=offer;
+  document.getElementById('sRate').textContent=applied>0?Math.round(resp/applied*100)+'%':'—';
+}
+function updateBadges(){document.getElementById('nb-apps').textContent=apps.length;}
+
+function openModal(){
+  editId=null;
+  ['mCo','mRole','mUrl','mSal','mRes','mResV','mNotes','mId'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('mLoc').value='Dublin, Ireland';
+  document.getElementById('mStage').value='applied';
+  document.getElementById('mDate').value=today();
+  document.getElementById('mTitle').textContent='Add application';
+  document.getElementById('modal').classList.add('open');
+}
+function closeModal(){document.getElementById('modal').classList.remove('open');editId=null;}
+document.getElementById('modal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeModal();});
+
+function editApp(id){
+  const a=apps.find(x=>x.id===id);if(!a)return;
+  editId=id;
+  document.getElementById('mCo').value=a.company||'';
+  document.getElementById('mRole').value=a.title||'';
+  document.getElementById('mLoc').value=a.loc||'Dublin, Ireland';
+  document.getElementById('mStage').value=a.stage||'applied';
+  document.getElementById('mDate').value=a.dateApplied||today();
+  document.getElementById('mUrl').value=a.url||'';
+  document.getElementById('mSal').value=a.salary||'';
+  document.getElementById('mRes').value=a.result||'';
+  document.getElementById('mResV').value=a.resumeName||'';
+  document.getElementById('mNotes').value=a.notes||'';
+  document.getElementById('mTitle').textContent='Edit: '+a.company;
+  document.getElementById('modal').classList.add('open');
+}
+
+function saveApp(){
+  const co=document.getElementById('mCo').value.trim(),role=document.getElementById('mRole').value.trim();
+  if(!co||!role){alert('Company and role required.');return;}
+  const rec={id:editId||uid(),jobId:'',company:co,title:role,loc:document.getElementById('mLoc').value.trim(),stage:document.getElementById('mStage').value,dateApplied:document.getElementById('mDate').value,url:document.getElementById('mUrl').value.trim(),salary:document.getElementById('mSal').value.trim(),result:document.getElementById('mRes').value.trim(),resumeName:document.getElementById('mResV').value.trim(),notes:document.getElementById('mNotes').value.trim(),lastUpdated:today(),createdAt:today()};
+  if(editId){const i=apps.findIndex(a=>a.id===editId);if(i>-1){rec.jobId=apps[i].jobId||'';apps[i]=rec;}}else apps.push(rec);
+  saveApps();updateStats();updateBadges();renderTracker();renderPipeline();
+  const fl=document.getElementById('appFlash');fl.style.display='inline';setTimeout(()=>{fl.style.display='none';closeModal();},700);
+}
+function delApp(id){if(!confirm('Delete?'))return;apps=apps.filter(a=>a.id!==id);saveApps();updateStats();updateBadges();renderTracker();renderPipeline();renderTimeline();}
+function saveApps(){localStorage.setItem('dh_apps',JSON.stringify(apps));}
+
+function liveValidateKey(){
+  const v=document.getElementById('keyInput').value.trim();
+  const w=document.getElementById('keyWarnBox');
+  if(v&&!v.startsWith('sk-ant-')){w.textContent='Key should start with sk-ant-';w.style.display='block';}
+  else w.style.display='none';
+}
+async function saveKey(){
+  const k=document.getElementById('keyInput').value.trim();if(!k){alert('Paste your API key.');return;}
+  try{
+    const r=await fetch(API+'/api/save-config',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({anthropicKey:k})});
+    if(!r.ok)throw new Error('Server '+r.status+' — is it running?');
+    await r.json();
+    const fl=document.getElementById('keySaved');fl.style.display='inline';setTimeout(()=>fl.style.display='none',3000);
+    document.getElementById('keyInput').value='';
+    await testKey();
+  }catch(e){alert('Save failed: '+e.message);}
+}
+async function testKey(){
+  const w=document.getElementById('keyWarnBox'),s=document.getElementById('keySuccessBox');
+  w.style.display='none';s.style.display='none';
+  document.getElementById('keyStatus').textContent='Testing…';
+  try{
+    const txt=await callClaude({model:'claude-sonnet-4-20250514',max_tokens:10,messages:[{role:'user',content:'Reply "ok"'}]});
+    document.getElementById('keyStatus').textContent='Working ✓ — "'+txt.trim().slice(0,20)+'"';
+    s.textContent='API key active — 3 agents ready.';s.style.display='block';checkAPI();
+  }catch(e){
+    document.getElementById('keyStatus').textContent='Failed: '+e.message;
+    w.textContent='Key test failed: '+e.message;w.style.display='block';
+  }
+}
+function saveCV(){
+  cv=document.getElementById('cvText').value.trim();
+  if(!cv){alert('Paste your CV text first.');return;}
+  localStorage.setItem('dh_cv',cv);scores={};tailored={};
+  const fl=document.getElementById('cvSaved');fl.style.display='inline';setTimeout(()=>fl.style.display='none',2000);
+}
+function activateSched(){
+  const t=document.getElementById('schedTime').value,d=document.getElementById('schedDays').value;
+  if(sched)clearInterval(sched);
+  sched=setInterval(()=>{const n=new Date(),wd=n.getDay();const[sh,sm]=t.split(':').map(Number);if(n.getHours()===sh&&n.getMinutes()===sm&&(d==='daily'||(wd>0&&wd<6)))softRefresh();},60000);
+  document.getElementById('schedSt').textContent=`Active · ${t} ${d==='weekdays'?'Mon–Fri':'daily'}`;
+  document.getElementById('schedBtn').style.display='none';
+  document.getElementById('stopBtn').style.display='inline-flex';
+}
+function stopSched(){if(sched)clearInterval(sched);sched=null;document.getElementById('schedSt').textContent='Stopped';document.getElementById('schedBtn').style.display='inline-flex';document.getElementById('stopBtn').style.display='none';}
+function softRefresh(){document.getElementById('lastFetch').textContent=new Date().toLocaleTimeString('en-IE',{hour:'2-digit',minute:'2-digit'});renderJobs();}
+</script>
+</body>
+</html>

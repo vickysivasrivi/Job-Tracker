@@ -1,0 +1,6 @@
+{
+  "anthropicKey": "",
+  "port": 3747,
+  "scheduleTime": "08:00",
+  "scheduleDays": "daily"
+}
