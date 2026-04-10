@@ -1,18 +1,17 @@
-name: Daily DevOps Job Hunt
+name: Tech Job Hunt
 
 on:
   schedule:
     - cron: '0 7 * * *'   # 7:00 AM UTC = 8:00 AM Ireland (UTC+1)
-  workflow_dispatch:       # Also run manually from GitHub Actions tab
+  workflow_dispatch:       # Run manually from GitHub Actions tab
 
-# Give the workflow permission to commit seen_jobs.json back to the repo
 permissions:
   contents: write
 
 jobs:
   daily-automation:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30    # 3 categories × ~8min each = ~24min max
 
     steps:
       - name: Checkout repo
@@ -28,21 +27,19 @@ jobs:
       - name: Install dependencies
         run: pip install reportlab
 
-      - name: Run daily job automation
+      - name: Run job automation
         env:
-          ANTHROPIC_KEY:  ${{ secrets.ANTHROPIC_KEY }}
-          APIFY_TOKEN:    ${{ secrets.APIFY_TOKEN }}
-          EMAIL_FROM:     ${{ secrets.EMAIL_FROM }}
-          EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
-          EMAIL_TO:       ${{ secrets.EMAIL_TO }}
-          YOUR_RESUME:    ${{ secrets.YOUR_RESUME }}
-          JOB_TITLE:      ${{ vars.JOB_TITLE }}
-          JOB_LOCATION:   ${{ vars.JOB_LOCATION }}
-          MIN_SCORE:      ${{ vars.MIN_SCORE }}
-          TOP_N:          ${{ vars.TOP_N }}
+          ANTHROPIC_KEY:      ${{ secrets.ANTHROPIC_KEY }}
+          APIFY_TOKEN:        ${{ secrets.APIFY_TOKEN }}
+          EMAIL_FROM:         ${{ secrets.EMAIL_FROM }}
+          EMAIL_PASSWORD:     ${{ secrets.EMAIL_PASSWORD }}
+          EMAIL_TO:           ${{ secrets.EMAIL_TO }}
+          YOUR_RESUME:        ${{ secrets.YOUR_RESUME }}
+          JOB_LOCATION:       ${{ vars.JOB_LOCATION }}
+          MIN_SCORE:          ${{ vars.MIN_SCORE }}
+          TOP_N_PER_CATEGORY: ${{ vars.TOP_N_PER_CATEGORY }}
         run: python scripts/daily_automation.py
 
-      # Commit seen_jobs.json back to repo so duplicates are tracked across days
       - name: Save seen jobs to repo
         run: |
           git config user.name  "github-actions[bot]"
